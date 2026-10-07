@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -58,6 +58,8 @@ function health(component, mileage) {
 
 function App(){
   const [tab,setTab] = useState('home')
+  const [theme,setTheme] = useState(() => localStorage.getItem('garage.theme') || 'light')
+  useEffect(() => { document.documentElement.dataset.theme = theme; localStorage.setItem('garage.theme', theme) }, [theme])
   const [showAdd,setShowAdd] = useState(false)
   const {car, expenses, components} = useGarage()
   const total = expenses.reduce((s,e)=>s+Number(e.amount||0),0)
@@ -67,7 +69,7 @@ function App(){
   const avgHealth = Math.round(healths.reduce((s,c)=>s+c.score,0)/healths.length)
 
   return <div className="app">
-    <header className="topbar"><div className="brand"><span className="brandMark">G</span><div><b>GARAGE</b><small>цифровая история автомобиля</small></div></div><div className="carMini"><span>{car.brand} {car.model}</span><em>{car.mileage.toLocaleString('ru-RU')} км</em></div></header>
+    <header className="topbar"><div className="brand"><span className="brandMark">G</span><div><b>GARAGE</b><small>цифровая история автомобиля</small></div></div><div className="headerActions"><div className="carMini"><span>{car.brand} {car.model}</span><em>{car.mileage.toLocaleString('ru-RU')} км</em></div><button className="themeToggle" onClick={()=>setTheme(theme==='light'?'dark':'light')} aria-label="Переключить тему">{theme==='light'?'☾':'☀'}</button></div></header>
     <main className="content">
       {tab==='home' && <Home car={car} avgHealth={avgHealth} attention={attention} month={month} total={total} onAdd={()=>setShowAdd(true)} onTab={setTab} healths={healths}/>} 
       {tab==='expenses' && <Expenses expenses={expenses} onAdd={()=>setShowAdd(true)} onRemove={useGarage.getState().removeExpense}/>} 
